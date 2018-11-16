@@ -11,37 +11,51 @@
 </head>
 
 <body onload="learnmeacity()">
-  <h1>Learn you a City</h1>
-  <div id="instructions">
-    <h2>Instructions</h2>
-    'Learn you a city' helps you locate streets in a city. <a href="#" onclick="$('#moreinfo').show(); $(this).hide()" />more
-    info</a>
-    <div id="moreinfo">
-      You will be presented with a challenge: click the part of the city that you think contains the street of which
-      the name is shown.
-      If you're correct (or close enough), the map will zoom in on the selected quadrant, and you'll be asked to locate
-      the
-      street again. This will continue until either the street is sufficiently located or you've chosen a quadrant not
-      containing the challenge. In either case, the challenge street will be highlighted and clicking the map will zoom
-      out
-      and provide you with a new challenge.
+  <div id="panel">
+    <div class="panel-body">
+      <span class="title">Know your City</span><span id="more-info-button" class="round-button" title="Show Instructions"
+        href="#" onclick="$('#moreinfo').show(); $(this).hide()">?</span>
+      <div id="instructions">
+        <div id="instruction-title">
+          <h2></h2>
+        </div>
+      </div>
+      <div id="controls">
+        <a href="#" id="start-button" class="button"></a><a href="#" id="next-button" class="button"></a><a href="#" id="reset-button"
+          class="button"></a>
+      </div>
+      <div id="messages">
+        <div id="message"></div>
+        <div id="challenge">
+          Please click where on the map you think '<span id="challengeStreetName"></span>' is.
+        </div>
+      </div>
     </div>
   </div>
-  <h2>Play!</h2>
-  <div id="controls">
-    <a href="#" id="start-button" class="button"></a><a href="#" id="next-button" class="button"></a><a href="#" id="reset-button" class="button"></a>
-  </div>
-  <div id="messages">
-    <div id="message"></div> 
-    <div id="challenge">
-      Please click where on the map you think '<span id="challengeStreetName"></span>' is.
+  <div id="moreinfo" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="$('#more-info-button').show(); $('#moreinfo').hide()">&times;</span>
+      <p>'Learn you a city' helps you locate streets in a city.
+        You will be presented with a challenge: click the part of the city that you think contains the street of which
+        the name is shown.
+        If you're correct (or close enough), the map will zoom in on the selected quadrant, and you'll be asked to
+        locate
+        the
+        street again. This will continue until either the street is sufficiently located or you've chosen a quadrant
+        not
+        containing the challenge. In either case, the challenge street will be highlighted and clicking the map will
+        zoom
+        out
+        and provide you with a new challenge.
+      </p>
     </div>
+
   </div>
   <div id="map"></div>
-  <a href="https://github.com/codeforeurope/learnyouacity"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"
-      alt="Fork me on GitHub"></a>
+  <div id="fork"><a href="https://github.com/codeforeurope/learnyouacity"><img style="position: absolute; top: 0; right: 0; border: 0;z-index:900"
+        src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a></div>
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src='./osmtogeojson.js'></script> 
+  <script src='./osmtogeojson.js'></script>
   <script src="//unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
     crossorigin=""></script>
   <script type="text/javascript" src="map.js"></script>

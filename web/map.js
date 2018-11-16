@@ -9,63 +9,15 @@ function LMap(id) {
   var map = new L.Map(id, {
     layers: [osmLayer],
     center: [12.1358, -68.9336],
-    zoom: 16
+    zoom: 16,
+    zoomControl:false
   });
   var layer;
   var callback;
 
-  function highlightWay(way) {
-    var points = [];
-
-    for (var i = 0; i < way.nodes.length; i++) {
-      var node = $(way.nodes[i]);
-      var point = new OpenLayers.Geometry.Point(node.attr('lon'), node.attr('lat'));
-      point.transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
-      points.push(point);
-    }
-
-    var line = new OpenLayers.Geometry.LineString(points)
-    solutionLayer.drawFeature(
-      new OpenLayers.Feature.Vector(line), {
-        fillColor: "red",
-        strokeWidth: 8,
-        strokeColor: "red"
-      });
-    solutionLayer.display(true);
-  }
-
-  function selectBox(callback) {
-    var control = new OpenLayers.Control();
-    OpenLayers.Util.extend(control, {
-      draw: function () {
-        // this Handler.Box will intercept the shift-mousedown
-        // before Control.MouseDefault gets to see it
-        this.box = new OpenLayers.Handler.Box(control, {
-          done: function (bounds) {
-            this.deactivate();
-            callback(lonLatFromPixel(bounds));
-          }
-        }, {
-          keyMask: OpenLayers.Handler.MOD_SHIFT
-        });
-        this.box.activate();
-      },
-    });
-    map.addControl(control);
-  }
-
-
-  function highlight(ways) {
-    for (var i = 0; i < ways.length; i++) {
-      highlightWay(ways[i]);
-    }
-  }
-
-
   // Public API
   return {
     // Allow the user to select a box using shift-click, call a callback with the bounds on success
-    selectBox: selectBox,
     // center the map to the middle of the 'bounds' and zoom to the zoom level specified
     map: map,
     getBounds: function () {
@@ -115,6 +67,5 @@ function LMap(id) {
     toLatlng: function (lnglat) {
       return L.latLng(lnglat.lat, lnglat.lng);
     },
-    highlight: highlight
   };
 };

@@ -15,7 +15,7 @@ function learnmeacity() {
 
   function invalidResponseReceived(street) {
     tries++;
-    showMessage('No, that\'s not ' + currentChallenge + ', but ' + street + '. ' + tries + ' tries');
+    showMessage('No, that\'s not ' + currentChallenge + ', but ' + street + '. (' + tries + ' tries)');
     //map.highlight(currentChallenge.ways);
     //map.waitForClick(newChallenge);
   }
@@ -142,7 +142,7 @@ function learnmeacity() {
         callback(array_unique(streets));
       })
       .fail(function (jqXhr, textStatus, errorThrown) {
-        alert("Error, perhaps try a smaller region? " + textStatus);
+        showMessage("Error, please try a smaller region? ");
         console.log(jqXhr);
         console.log(errorThrown);
       });
