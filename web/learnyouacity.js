@@ -16,7 +16,7 @@ var hide = function (id) {
 // Glue-ing everything together
 function learnmeacity() {
   var map = new LMap('map');
-  var overpassUrl = 'http://overpass-api.de/api/interpreter';
+  var overpassUrl = '//overpass-api.de/api/interpreter';
   // When starting out with a larger map getting the streets will be too slow
   var minimumInitialLevel = 13;
   var currentChallenge;
