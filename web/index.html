@@ -1,40 +1,52 @@
 <!DOCTYPE html>
 
 <html>
-  <head>
-    <title>Learn you a City</title>
 
-    <link rel="stylesheet" href="learnyouacity.css" type="text/css"/>   
-    <link rel="stylesheet" href="OpenLayers-2.13.1/theme/default/style.css" type="text/css"/>   
+<head>
+  <meta charset="utf-8" />
+  <title>Learn you a City</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+    crossorigin="" />
+  <link rel="stylesheet" href="learnyouacity.css" type="text/css" />
+</head>
 
-    <script type="text/javascript" src="jquery-1.9.1.min.js"></script>
-    <script type="text/javascript" src="OpenLayers-2.13.1/OpenLayers.js"></script>
-    <script type="text/javascript" src="map.js"></script>
-    <script type="text/javascript" src="streetdata.js"></script>
-    <script type="text/javascript" src="learnyouacity.js"></script>
-  </head>
-
-  <body onload="learnmeacity()">
-    <h1>Learn you a City</h1>
-    <div id="instructions"><h2>Instructions</h2>
-      'Learn you a city' helps you locate streets in a city. <a href="#" onclick="$('#moreinfo').show(); $(this).hide()"/>more info</a>
-      <div id="moreinfo">
-      You will be presented with a challenge: click the part of the city that you think contains the street of which the name is shown.
-      If you're correct (or close enough), the map will zoom in on the selected quadrant, and you'll be asked to locate the
-      street again. This will continue until either the street is sufficiently located or you've chosen a quadrant not 
-      containing the challenge. In either case, the challenge street will be highlighted and clicking the map will zoom out
+<body onload="learnmeacity()">
+  <h1>Learn you a City</h1>
+  <div id="instructions">
+    <h2>Instructions</h2>
+    'Learn you a city' helps you locate streets in a city. <a href="#" onclick="$('#moreinfo').show(); $(this).hide()" />more
+    info</a>
+    <div id="moreinfo">
+      You will be presented with a challenge: click the part of the city that you think contains the street of which
+      the name is shown.
+      If you're correct (or close enough), the map will zoom in on the selected quadrant, and you'll be asked to locate
+      the
+      street again. This will continue until either the street is sufficiently located or you've chosen a quadrant not
+      containing the challenge. In either case, the challenge street will be highlighted and clicking the map will zoom
+      out
       and provide you with a new challenge.
-      </div>
     </div>
-    <h2>Play!</h2>
-    <div id="controls">
-      <a href="#" id="button"></a>
-      <div id="message"></div>
-      <div id="challenge">
-        Please click where on the map you think '<span id="challengeStreetName"></span>' is.
-      </div>
-    </div> 
-    <div id="map"></div>
-    <a href="https://github.com/raboof/learnyouacity"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
-  </body>
+  </div>
+  <h2>Play!</h2>
+  <div id="controls">
+    <a href="#" id="start-button" class="button"></a><a href="#" id="next-button" class="button"></a><a href="#" id="reset-button" class="button"></a>
+  </div>
+  <div id="messages">
+    <div id="message"></div> 
+    <div id="challenge">
+      Please click where on the map you think '<span id="challengeStreetName"></span>' is.
+    </div>
+  </div>
+  <div id="map"></div>
+  <a href="https://github.com/raboof/learnyouacity"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"
+      alt="Fork me on GitHub"></a>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src='./osmtogeojson.js'></script> 
+  <script src="//unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+    crossorigin=""></script>
+  <script type="text/javascript" src="map.js"></script>
+  <script type="text/javascript" src="learnyouacity.js"></script>
+
+</body>
+
 </html>

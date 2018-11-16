@@ -1,100 +1,37 @@
 function LMap(id) {
-  // prevent resizing
-  var mapDiv = $('#' + id);
-  mapDiv.width(mapDiv.width());
-  
-  var osmLayer = new OpenLayers.Layer.OSM();
-  var solutionLayer = new OpenLayers.Layer.Vector("Current solution");
-  var navigationControl = new OpenLayers.Control.Navigation({ dragPanOptions: { enableKinetic: true } });
-  var zoomControl = new OpenLayers.Control.Zoom()  
-  var map = new OpenLayers.Map({
-    div: id,
-    layers: [ osmLayer, solutionLayer ],
-    controls: [
-      new OpenLayers.Control.Attribution(),
-      navigationControl,
-      zoomControl
-    ],
-    center: [680000, 6840000],
-    zoom: 10 
-  }); 
-
-  OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {
-      initialize: function(options) {
-                      this.handlerOptions = OpenLayers.Util.extend(
-                        { "single" :         true, 
-                          "stopSingle" :     true,
-                          "stopDouble" :     true,
-                          "pixelTolerance" : 10
-                        }, this.defaultHandlerOptions
-                      );
-                      OpenLayers.Control.prototype.initialize.apply(
-                        this, arguments
-                      ); 
-                      this.handler = new OpenLayers.Handler.Click(
-                        this, {
-                            'click': this.onClick,
-                        }, this.handlerOptions
-                      );
-      },
-      onClick: function(evt) { 
-        if (this.callback) {
-          var callback = this.callback;
-          this.callback = null;
-
-          var pixel = new OpenLayers.Pixel(evt.xy.x, evt.xy.y);
-          var lonlat = map.getLonLatFromPixel(pixel); 
-          lonlat.transform(map.getProjectionObject(), new OpenLayers.Projection("EPSG:4326"));
- 
-          callback(lonlat);
-        }
-      }
+  var mapbox_token = 'pk.eyJ1IjoibWlibG9uIiwiYSI6ImNqYTlleHZ6dTBocjgzM25pOHhoNWlndWwifQ.yQd0SHT9J3gmTqmbx1amsg';
+  var osmLayer = new L.TileLayer('https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token=' +
+    mapbox_token, {
+      attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a>' +
+        '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
-  var clickControl = new OpenLayers.Control.Click();
-  map.addControl(clickControl);
 
-  function lonLatFromPixel(bounds) {
-      var lowerLeftLonLat = map.getLonLatFromPixel(new OpenLayers.Pixel(
-          bounds.left, bounds.bottom));
-      var upperRightLonLat = map.getLonLatFromPixel(new OpenLayers.Pixel(
-          bounds.right, bounds.top));
-
-      var bounds = new OpenLayers.Bounds(lowerLeftLonLat.lon,
-          lowerLeftLonLat.lat, upperRightLonLat.lon, upperRightLonLat.lat);
-
-      bounds.transform(map.getProjectionObject(), new OpenLayers.Projection("EPSG:4326"));
-
-      return bounds;
-  }
+  var map = new L.Map(id, {
+    layers: [osmLayer],
+    center: [12.1358, -68.9336],
+    zoom: 16
+  });
+  var layer;
+  var callback;
 
   function highlightWay(way) {
     var points = [];
 
-    for (var i = 0; i < way.nodes.length; i++) { 
-        var node = $(way.nodes[i]);
-        var point = new OpenLayers.Geometry.Point(node.attr('lon'), node.attr('lat'));
-        point.transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
-        points.push(point);
+    for (var i = 0; i < way.nodes.length; i++) {
+      var node = $(way.nodes[i]);
+      var point = new OpenLayers.Geometry.Point(node.attr('lon'), node.attr('lat'));
+      point.transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
+      points.push(point);
     }
 
     var line = new OpenLayers.Geometry.LineString(points)
     solutionLayer.drawFeature(
-      new OpenLayers.Feature.Vector(line),
-      {
+      new OpenLayers.Feature.Vector(line), {
         fillColor: "red",
         strokeWidth: 8,
         strokeColor: "red"
       });
     solutionLayer.display(true);
-  }
-
-  function removeNavigationControls() {
-    navigationControl.deactivate();
-    map.removeControl(navigationControl);
-    zoomControl.deactivate();
-    map.removeControl(zoomControl);
-
-    clickControl.activate();
   }
 
   function selectBox(callback) {
@@ -103,46 +40,20 @@ function LMap(id) {
       draw: function () {
         // this Handler.Box will intercept the shift-mousedown
         // before Control.MouseDefault gets to see it
-        this.box = new OpenLayers.Handler.Box( control,
-          { 
-            done: function(bounds) { 
-                    removeNavigationControls();
-                    map.removeControl(control);
-                    this.deactivate();
-                    callback(lonLatFromPixel(bounds));
-                  } 
-          },
-          { keyMask: OpenLayers.Handler.MOD_SHIFT });
+        this.box = new OpenLayers.Handler.Box(control, {
+          done: function (bounds) {
+            this.deactivate();
+            callback(lonLatFromPixel(bounds));
+          }
+        }, {
+          keyMask: OpenLayers.Handler.MOD_SHIFT
+        });
         this.box.activate();
       },
     });
     map.addControl(control);
   }
 
-  function zoomTo(bounds, zoom) {
-    var projected = bounds.clone().transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
-
-    var center = projected.getCenterLonLat();
-    if (!zoom) {
-      zoom = map.getZoomForExtent(projected);
-    }
-
-    map.setCenter(center, zoom);
-   
-    return map.getExtent().transform(map.getProjectionObject(), new OpenLayers.Projection("EPSG:4326"));
-  }
-
-  function zoomToLonLat(lonlat, zoomlevel) {
-    var center = lonlat.clone().transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
-
-    map.setCenter(center, zoomlevel);
-
-    return getCurrentBounds();
-  }
-
-  function waitForClick(callback) {
-    clickControl.callback = callback;
-  }
 
   function highlight(ways) {
     for (var i = 0; i < ways.length; i++) {
@@ -150,25 +61,61 @@ function LMap(id) {
     }
   }
 
-  function getCurrentBounds() {
-    var extent = map.getExtent();
-    return extent.transform(map.getProjectionObject(), new OpenLayers.Projection("EPSG:4326"));
-  }
 
   // Public API
   return {
     // Allow the user to select a box using shift-click, call a callback with the bounds on success
     selectBox: selectBox,
     // center the map to the middle of the 'bounds' and zoom to the zoom level specified
-    zoomTo: zoomTo, 
-    zoomToLonLat: zoomToLonLat,
-    getZoom: function() { return map.getZoom(); },
-    getCurrentBounds: getCurrentBounds,
-    removeNavigationControls: removeNavigationControls,
-    clear: function()   { solutionLayer.removeAllFeatures(); },
+    map: map,
+    getBounds: function () {
+      return map.getBounds();
+    },
+    callback,
+    zoomTo: function (coords, zoom) {
+      map.setView(coords, zoom);
+    },
+    getZoom: function () {
+      return map.getZoom();
+    },
+    clickResult: function () {
+      return street;
+    },
 
-    highlight: highlight,
-    waitForClick: waitForClick,
-    getProjectionObject: function() { return map.getProjectionObject(); }
+    addLayer: function (data, callback) {
+      if(layer){
+        map.removeLayer(layer);
+      }
+      var noIcon = new L.Icon({
+        iconSize: [0, 0],
+        iconAnchor: [0, 0],
+        iconUrl: 'blank'
+      });
+
+      layer = L.geoJSON(data, {
+        style: {
+          "opacity": 0.2,
+          "color": '#ffff00'
+        },
+        pointToLayer: function (feature, latlng) {
+          return L.marker(latlng, {
+            icon: noIcon
+          });
+        },
+        onEachFeature: function (feature, featureLayer) {
+          featureLayer.on('click', function (e) {
+            street = e.target.feature.properties.tags.name;
+            callback(street);
+          });
+        }
+      });
+      if(layer && !map.hasLayer(layer)){
+        layer.addTo(map);
+      }
+    },
+    toLatlng: function (lnglat) {
+      return L.latLng(lnglat.lat, lnglat.lng);
+    },
+    highlight: highlight
   };
 };

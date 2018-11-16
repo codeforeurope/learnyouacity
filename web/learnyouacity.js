@@ -1,46 +1,34 @@
-var allWays; 
+var allWays;
 
 // Glue-ing everything together
 function learnmeacity() {
-
   var map = new LMap('map');
-  var streetdata = new LStreetData('http://www.overpass-api.de/api/xapi');
-  var cityBounds;
-  var cityZoom;
-  var levelsToUse = 5;
-  var levelStep = 2;
+  var overpassUrl = 'http://overpass-api.de/api/interpreter';
   // When starting out with a larger map getting the streets will be too slow
   var minimumInitialLevel = 13;
-
-  var maxLevel;
   var currentChallenge;
-  var currentLevel;
-  var currentBounds;
-
-  function error(foo, bar) {
-    alert("Error, perhaps try a smaller region? " + bar);
-  }
+  var tries = 0;
 
   function randomElement(obj) {
     return obj[Math.floor(obj.length * Math.random())];
   }
 
-  function invalidResponseReceived() {
-    map.clear();
-    showMessage('Bummer! You failed to locate ' + currentChallenge.name + ' - here it is!');
-    map.highlight(currentChallenge.ways);
-    map.waitForClick(newChallenge);
+  function invalidResponseReceived(street) {
+    tries++;
+    showMessage('No, that\'s not ' + currentChallenge + ', but ' + street + '. ' + tries + ' tries');
+    //map.highlight(currentChallenge.ways);
+    //map.waitForClick(newChallenge);
   }
 
-  function showButton(msg, onclick) {
-    $('#button')
+  function showButton(id, msg, onclick) {
+    $(id)
       .show()
       .text(msg)
       .on('click', onclick);
   }
 
-  function hideButton() {
-    $('#button').hide();
+  function hideButton(id) {
+    $(id).hide();
   }
 
   function showMessage(msg) {
@@ -51,58 +39,25 @@ function learnmeacity() {
     box.show();
   }
 
-  function validResponseReceived(selectedBounds) {
-    currentLevel = currentLevel + levelStep;
-    if (currentLevel >= maxLevel) {
-      showMessage('Congratulations! Successfully identified ' + currentChallenge.name);
-      map.highlight(currentChallenge.ways);
-      map.waitForClick(newChallenge);
+  function validResponseReceived(street) {
+    showMessage('Congratulations! Successfully identified ' + street);
+    hideButton('#reset-button');
+    showButton('#next-button', 'Next', newChallenge);
+  }
+
+  function receiveResponse(street) {
+    if (street !== currentChallenge) {
+      invalidResponseReceived(street);
     } else {
-      currentBounds = selectedBounds;
-      map.waitForClick(receiveResponse)
+      validResponseReceived(street);
     }
   }
 
-  function containsChallenge(selectedArea) {
-    var ways = currentChallenge.ways;
-    for (var i = 0; i < ways.length; i++) {
-      var way = ways[i];
-      for (var j = 0; j < way.nodes.length; j++) { 
-        var node = $(way.nodes[j]);
-        var lonlat = new OpenLayers.LonLat(node.attr('lon'), node.attr('lat'));
-        if (selectedArea.containsLonLat(lonlat)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  function receiveResponse(lonlat) {
-    // Zoom in and determine bounds of selected area
-    var previousBounds = currentBounds;
-    map.zoomToLonLat(lonlat, currentLevel+levelStep);
-    var selectedBounds = map.getCurrentBounds();
-
-    if (containsChallenge(selectedBounds)) {
-      validResponseReceived(selectedBounds);
-    } else {
-      map.zoomTo(previousBounds, currentLevel);
-      invalidResponseReceived();
-    }
-  }
-
-  function showChallenge(challenge, cityBounds) {
+  function showChallenge(challenge) {
     currentChallenge = challenge;
-    currentBounds = map.zoomTo(cityBounds, cityZoom);
-    currentLevel = map.getZoom();
-    maxLevel = currentLevel + levelsToUse;
-    $('#challengeStreetName').text(challenge.name);
+    $('#challengeStreetName').text(challenge);
     $('#challenge').show();
     $('#message').hide();
-
-    map.clear();
-    map.waitForClick(receiveResponse)
   }
 
   function chooseNextChallenge() {
@@ -110,7 +65,10 @@ function learnmeacity() {
   }
 
   function newChallenge() {
-    showChallenge(chooseNextChallenge(), cityBounds);
+    hideButton('#next-button');
+    showButton('#reset-button', 'Reset', startGame);
+    tries = 0;
+    showChallenge(chooseNextChallenge());
   }
 
   function waysSelected(ways) {
@@ -118,32 +76,61 @@ function learnmeacity() {
     newChallenge();
   }
 
-  function citySelected(bounds, zoom) {
-    cityBounds = bounds;
-    cityZoom = zoom;
-
-    map.removeNavigationControls();
-    map.zoomTo(bounds, zoom);
+  function citySelected(bounds) {
     showMessage("Loading streets, please wait...");
-    streetdata.ways(bounds, waysSelected, error);
+    ways(bounds, waysSelected);
   }
 
   function startGame() {
-    var bounds = map.getCurrentBounds();
+    var bounds = map.getBounds();
     var zoom = map.getZoom();
-
     if (zoom < minimumInitialLevel) {
       showMessage("Area too large - please zoom in further");
     } else {
-      hideButton();
-      citySelected(bounds, zoom);
+      hideButton('#start-button');
+      hideButton('#reset-button');
+      citySelected(bounds);
     }
   }
 
   function selectPlayingField() {
     showMessage('Please zoom to the region you want to learn');
-    showButton('Start Game', startGame);
+    showButton('#start-button', 'Start Game', startGame);
   }
 
+  function ways(bounds, callback) {
+    // bounds: left/bottom/right/top in lat/lon
+    query = encodeURI('[out:json];way[name][highway](' + bounds.getSouth() + ',' + bounds.getWest() + ',' + bounds.getNorth() + ',' + bounds.getEast() + ');(._; >;);out;');
+    var queryUrl = overpassUrl + '?data=' + query;
+    $.ajax(queryUrl, {
+        dataType: "json"
+      })
+      .done(function (data) {
+        var geojson = osmtogeojson(data);
+        var streets = [];
+        geojson.features.forEach(function (element, idx) {
+          if (element.properties.type === 'way') {
+            streets.push(element.properties.tags.name);
+          }
+        });
+        map.addLayer(geojson, receiveResponse);
+
+        function array_unique(arr) {
+          var result = [];
+          for (var i = 0; i < arr.length; i++) {
+            if (result.indexOf(arr[i]) == -1) {
+              result.push(arr[i]);
+            }
+          }
+          return result;
+        }
+        callback(array_unique(streets));
+      })
+      .fail(function (jqXhr, textStatus, errorThrown) {
+        alert("Error, perhaps try a smaller region? " + textStatus);
+        console.log(jqXhr);
+        console.log(errorThrown);
+      });
+  }
   selectPlayingField();
 }

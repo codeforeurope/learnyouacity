@@ -16,19 +16,33 @@ body {
 #controls {
   text-align: center;
 }
-
+#messages {
+  text-align: center;
+  padding: .5em;
+}
 #challenge {
   margin-bottom: 10px;
   display: none;
 }
-
-#button {
-  background-color: yellow;
-  padding: 10px;
-  display: block;
-  width: 10%;
-  margin-left: 45%;
+.button {
+  padding: .5em;
+  text-align: center;
+  display: none;
   text-decoration: none;
+  color: #ffffff;
+}
+
+#start-button {
+  background-color: #008CBA;
+}
+
+#next-button {
+  background-color: #4CAF50;
+}
+
+#reset-button {
+  background-color: #e7e7e7; 
+  color: black;
 }
 
 #message {
