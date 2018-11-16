@@ -10,7 +10,11 @@ function LMap(id) {
     layers: [osmLayer],
     center: [12.1358, -68.9336],
     zoom: 16,
-    zoomControl:false
+    zoomControl: false
+  });
+  map.locate({
+    setView: true,
+    watch: true
   });
   var layer;
   var callback;
@@ -35,7 +39,7 @@ function LMap(id) {
     },
 
     addLayer: function (data, callback) {
-      if(layer){
+      if (layer) {
         map.removeLayer(layer);
       }
       var noIcon = new L.Icon({
@@ -60,7 +64,7 @@ function LMap(id) {
           });
         }
       });
-      if(layer && !map.hasLayer(layer)){
+      if (layer && !map.hasLayer(layer)) {
         layer.addTo(map);
       }
     },
