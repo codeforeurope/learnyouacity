@@ -10,15 +10,16 @@ body {
 #moreinfo {
   display: none;
 }
-
+#fork {
+  display: none;
+}
 #panel {
   position: absolute;
-
-  bottom: 10px;
-  left: 10px;
-  width: 25%;
+  bottom: 0;
+  left: 0;
   z-index: 900;
-  padding: .3em;
+  margin: 0;
+  width: 100%;
   background-color: #fff;
 }
 
@@ -26,9 +27,7 @@ body {
   margin: .5em;
 }
 
-#fork {
-  z-index: 900;
-}
+
 
 #map {
   width: auto;
@@ -147,3 +146,19 @@ body {
   text-decoration: none;
   cursor: pointer;
 }
+
+@media (min-width: 576px) {}
+
+@media (min-width: 768px) {}
+
+@media (min-width: 992px) {
+  #panel {
+    width: 25%;
+  }
+  #fork {
+    display: block;
+    z-index: 900;
+  }
+}
+
+@media (min-width: 1200px) {}
