@@ -104,8 +104,7 @@ function LMap(id) {
         },
         onEachFeature: function (feature, featureLayer) {
           featureLayer.on('click', function (e) {
-            street = e.target.feature.properties.tags.name;
-            callback(street);
+            callback(e);
           });
         }
       });

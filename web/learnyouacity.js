@@ -8,7 +8,7 @@ function learnmeacity() {
   var minimumInitialLevel = 13;
   var currentChallenge;
   var tries = 0;
-
+  var finished = {};
   function randomElement(obj) {
     return obj[Math.floor(obj.length * Math.random())];
   }
@@ -39,17 +39,32 @@ function learnmeacity() {
     box.show();
   }
 
-  function validResponseReceived(street) {
-    showMessage('Congratulations! Successfully identified ' + street);
-    hideButton('#reset-button');
-    showButton('#next-button', 'Next', newChallenge);
+  function validResponseReceived(e) {
+    var msg = 'Congratulations! Successfully identified ' + e.target.feature.properties.tags.name;
+    
+    allWays = allWays.filter(function(item) { 
+      return item !== e.target.feature.properties.tags.name;
+    });
+    e.target.setStyle({color:'#00ff00', opacity: 0.8 });
+    finished['street'] = {tries: tries, feature: e.target.feature};
+
+    if(allWays.length > 0) {
+      showMessage(msg);
+      hideButton('#reset-button');
+      showButton('#next-button', 'Next', newChallenge);
+    } else {
+      showMessage(msg + '. All done. Press Start to start a new game.');
+      hideButton('#reset-button');
+      showButton('#start-button', 'Start', startGame);
+    }
+    
   }
 
-  function receiveResponse(street) {
-    if (street !== currentChallenge) {
-      invalidResponseReceived(street);
+  function receiveResponse(e) {
+    if (e.target.feature.properties.tags.name !== currentChallenge) {
+      invalidResponseReceived(e.target.feature.properties.tags.name);
     } else {
-      validResponseReceived(street);
+      validResponseReceived(e);
     }
   }
 
