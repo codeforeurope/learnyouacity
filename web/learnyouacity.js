@@ -9,6 +9,7 @@ function learnmeacity() {
   var currentChallenge;
   var tries = 0;
   var finished = {};
+
   function randomElement(obj) {
     return obj[Math.floor(obj.length * Math.random())];
   }
@@ -41,14 +42,21 @@ function learnmeacity() {
 
   function validResponseReceived(e) {
     var msg = 'Congratulations! Successfully identified ' + e.target.feature.properties.tags.name;
-    
-    allWays = allWays.filter(function(item) { 
+
+    allWays = allWays.filter(function (item) {
       return item !== e.target.feature.properties.tags.name;
     });
-    e.target.setStyle({color:'#00ff00', opacity: 0.8 });
-    finished['street'] = {tries: tries, feature: e.target.feature};
+    e.target.setStyle({
+      color: '#00ff00',
+      opacity: 0.8,
+      weight: 3
+    });
+    finished['street'] = {
+      tries: tries,
+      feature: e.target.feature
+    };
 
-    if(allWays.length > 0) {
+    if (allWays.length > 0) {
       showMessage(msg);
       hideButton('#reset-button');
       showButton('#next-button', 'Next', newChallenge);
@@ -57,7 +65,7 @@ function learnmeacity() {
       hideButton('#reset-button');
       showButton('#start-button', 'Start', startGame);
     }
-    
+
   }
 
   function receiveResponse(e) {

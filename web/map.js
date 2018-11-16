@@ -14,7 +14,7 @@ function LMap(id) {
   });
   map.locate({
     setView: true,
-    watch: true
+  //   watch: true
   });
   var layer;
   var callback;
@@ -50,8 +50,9 @@ function LMap(id) {
 
       layer = L.geoJSON(data, {
         style: {
-          "opacity": 0.2,
-          "color": '#ffff00'
+          "opacity": 0,
+          "color": '#ffffff',
+          "weight": 50
         },
         pointToLayer: function (feature, latlng) {
           return L.marker(latlng, {
